@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using Raylib_cs;
 
@@ -9,6 +10,7 @@ Raylib.SetTargetFPS(60);
 string screen = "menu";
 
 
+Rectangle gameBorder = new(25, 25, 800, 800);
 
 
 
@@ -41,7 +43,7 @@ while (!Raylib.WindowShouldClose())
     if (screen == "game"){
     
     Raylib.ClearBackground(Color.BLACK);
-    Raylib.DrawRectangleLines(20, 20, 800, 800,Color.DARKPURPLE);
+    Raylib.DrawRectangleLinesEx(gameBorder, 5, Color.DARKPURPLE);
 
     }
 
