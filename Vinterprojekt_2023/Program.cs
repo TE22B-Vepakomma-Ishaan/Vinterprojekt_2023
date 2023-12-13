@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Raylib_cs;
@@ -63,6 +64,31 @@ float characterCellHeight = 40;
 float characterDrawX = characterX * characterCellWidth;
 float characterDrawY = characterY * characterCellHeight;
 
+List<Rectangle> CellHitbox = new();
+
+
+//  for (int i = 0; i < Level.GetLength(0); i++)
+//     {
+//         for (int j = 0; j < Level.GetLength(1); j++)
+//         {
+//             if (Level[i, j] == 1)
+//             {
+//                 List<int> CellHitbox = new();
+//                 CellHitbox.Add(Level[i, j]);
+
+
+                
+
+//             }
+            
+//         }
+//     }
+
+
+
+
+
+
 
 while (!Raylib.WindowShouldClose())
 {
@@ -95,32 +121,22 @@ while (!Raylib.WindowShouldClose())
         movement = Vector2.Normalize(movement) * speed;
     }
 
-    characterDrawX += movement.X;
-    characterDrawY += movement.Y;
+    character.x += movement.X;
+    character.y += movement.Y;
 
     // ------------------Micke-----------------------
-    character.x = Math.Clamp(character.x, 25, 699);
-    character.y = Math.Clamp(character.y, 25, 699);
+    character.x = Math.Clamp(character.x, 25, 780);
+    character.y = Math.Clamp(character.y, 25, 780);
     // ------------------Micke----------------------- 
 
 
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_D) && characterX < GridSize - 1 && Level[characterY, characterX + 1] == 0)
+    if (Raylib.IsKeyDown(KeyboardKey.KEY_D))
     {
-        characterX++;
-    }
-    else if (Raylib.IsKeyDown(KeyboardKey.KEY_A) && characterX > 0 && Level[characterY, characterX - 1] == 0)
-    {
-        characterX--;
+        character.x++;
     }
 
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_S) && characterY < GridSize - 1 && Level[characterY + 1, characterX] == 0)
-    {
-        characterY++;
-    }
-    else if (Raylib.IsKeyDown(KeyboardKey.KEY_W) && characterY > 0 && Level[characterY - 1, characterX] == 0)
-    {
-        characterY--;
-    }
+    
+
 
 
 
@@ -151,12 +167,12 @@ while (!Raylib.WindowShouldClose())
         Raylib.DrawRectangleRec(enemy, Color.WHITE);
 
 
-        // Raylib.DrawRectangleRec(character, Color.BLANK);
-        // Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
-        Raylib.DrawText($"{characterDrawX}{characterDrawY}", 1000, 800, 20, Color.WHITE);
+        Raylib.DrawRectangleRec(character, Color.BLANK);
+        Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
+        Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
 
-        GameScreen(PlayerSprite, ScreenWidth, ScreenHeight, GridSize, Level, characterCellWidth, characterCellHeight, characterDrawX, characterDrawY);
-
+        GameScreen(PlayerSprite, ScreenWidth, ScreenHeight, GridSize, Level, characterCellWidth, characterCellHeight, characterDrawX, characterDrawY, CellHitbox);
+        
 
 
     }
@@ -175,7 +191,7 @@ while (!Raylib.WindowShouldClose())
 
 
 
-static void GameScreen(Texture2D PlayerSprite, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, float characterCellWidth, float characterCellHeight, float characterDrawX, float characterDrawY)
+static void GameScreen(Texture2D PlayerSprite, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, float characterCellWidth, float characterCellHeight, float characterDrawX, float characterDrawY, List<Rectangle> CellHitbox)
 {
     for (int i = 0; i < Level.GetLength(0); i++)
     {
@@ -183,20 +199,38 @@ static void GameScreen(Texture2D PlayerSprite, int ScreenWidth, int ScreenHeight
         {
             if (Level[i, j] == 1)
             {
-                // Calculate the position based on the 17x17 grid and the 800x800 window size
                 float CellWidth = ScreenWidth / (float)GridSize;
                 float CellHeight = ScreenHeight / (float)GridSize;
                 float x = j * CellWidth + 25;
                 float y = i * CellHeight + 25;
 
-                Raylib.DrawRectangle((int)x, (int)y, (int)CellWidth, (int)CellHeight, Color.BLUE);
+                Rectangle cell = new((int)x, (int)y, (int)CellWidth, (int)CellHeight);
+                CellHitbox.Add(cell);
+
+
             }
-            // Add more conditions to draw other elements (dots, Pac-Man, ghosts, etc.)
+            
         }
     }
+    foreach (var cell in CellHitbox)
+    {
+        Raylib.DrawRectangleRec(cell, Color.PURPLE);
+    }
+         
 
-
-    Raylib.DrawRectangle((int)characterDrawX, (int)characterDrawY, (int)characterCellWidth, (int)characterCellHeight, Color.YELLOW);
-    Raylib.DrawTexture(PlayerSprite, (int)characterDrawX, (int)characterDrawY, Color.PURPLE);
+ 
 }
 
+    // else if (Raylib.IsKeyDown(KeyboardKey.KEY_A) && characterX > 0 && Level[characterY, characterX - 1] == 0)
+    // {
+    //     characterX--;
+    // }
+
+    // if (Raylib.IsKeyDown(KeyboardKey.KEY_S) && characterY < GridSize - 1 && Level[characterY + 1, characterX] == 0)
+    // {
+    //     characterY++;
+    // }
+    // else if (Raylib.IsKeyDown(KeyboardKey.KEY_W) && characterY > 0 && Level[characterY - 1, characterX] == 0)
+    // {
+    //     characterY--;
+    // }
