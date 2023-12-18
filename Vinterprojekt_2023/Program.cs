@@ -8,7 +8,7 @@ Random generator = new();
 
 
 
-Raylib.InitWindow(1300, 1000, "Ghost");
+Raylib.InitWindow(1300, 1000, "Ghost game thing");
 Raylib.SetTargetFPS(60);
 
 
@@ -56,39 +56,12 @@ int[,] Level = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 
-int characterX = 1;
-int characterY = 1;
 
-float characterCellWidth = 40;
-float characterCellHeight = 40;
-float characterDrawX = characterX * characterCellWidth;
-float characterDrawY = characterY * characterCellHeight;
 
 List<Rectangle> CellHitbox = new();
 
 
-//  for (int i = 0; i < Level.GetLength(0); i++)
-//     {
-//         for (int j = 0; j < Level.GetLength(1); j++)
-//         {
-//             if (Level[i, j] == 1)
-//             {
-//                 List<int> CellHitbox = new();
-//                 CellHitbox.Add(Level[i, j]);
-
-
-                
-
-//             }
-            
-//         }
-//     }
-
-
-
-
-
-
+// Raylib--------------------------------------------------------------------------------------------------------------------------------
 
 while (!Raylib.WindowShouldClose())
 {
@@ -137,10 +110,10 @@ while (!Raylib.WindowShouldClose())
 
     
 
-
-
-
     // game-----------------------------------------------------------------------------------------------------------------------------
+    
+    
+    
     if (screen == "menu")
     {
 
@@ -171,7 +144,7 @@ while (!Raylib.WindowShouldClose())
         Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
         Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
 
-        GameScreen(PlayerSprite, ScreenWidth, ScreenHeight, GridSize, Level, characterCellWidth, characterCellHeight, characterDrawX, characterDrawY, CellHitbox);
+        GameScreen(PlayerSprite, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
         
 
 
@@ -191,7 +164,11 @@ while (!Raylib.WindowShouldClose())
 
 
 
-static void GameScreen(Texture2D PlayerSprite, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, float characterCellWidth, float characterCellHeight, float characterDrawX, float characterDrawY, List<Rectangle> CellHitbox)
+
+// Functions-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+static void GameScreen(Texture2D PlayerSprite, Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Rectangle> CellHitbox)
 {
     for (int i = 0; i < Level.GetLength(0); i++)
     {
@@ -209,28 +186,20 @@ static void GameScreen(Texture2D PlayerSprite, int ScreenWidth, int ScreenHeight
 
 
             }
-            
+
         }
     }
     foreach (var cell in CellHitbox)
     {
         Raylib.DrawRectangleRec(cell, Color.PURPLE);
-    }
-         
 
- 
+        if (Raylib.CheckCollisionRecs(cell, character))
+       {
+            //---- 
+       } 
+    }
+    
+
 }
 
-    // else if (Raylib.IsKeyDown(KeyboardKey.KEY_A) && characterX > 0 && Level[characterY, characterX - 1] == 0)
-    // {
-    //     characterX--;
-    // }
 
-    // if (Raylib.IsKeyDown(KeyboardKey.KEY_S) && characterY < GridSize - 1 && Level[characterY + 1, characterX] == 0)
-    // {
-    //     characterY++;
-    // }
-    // else if (Raylib.IsKeyDown(KeyboardKey.KEY_W) && characterY > 0 && Level[characterY - 1, characterX] == 0)
-    // {
-    //     characterY--;
-    // }
