@@ -25,6 +25,8 @@ Texture2D PlayerSprite = Raylib.LoadTexture("GreenBall.png");
 
 
 Vector2 movement = new(0, 0);
+float movementX = 1;
+float movementY = 1;
 float speed = 10;
 float Enemyspeed = 4;
 
@@ -72,22 +74,54 @@ while (!Raylib.WindowShouldClose())
 
     movement = Vector2.Zero;
 
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_D))
-    {
-        movement.X += 2;
-    }
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_A))
-    {
-        movement.X -= 2;
-    }
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_W))
-    {
-        movement.Y -= 2;
-    }
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_S))
-    {
-        movement.Y += 2;
-    }
+    // if (Raylib.IsKeyDown(KeyboardKey.KEY_D))
+    // {
+    //     movement.X += 2;
+    // }
+    // if (Raylib.IsKeyDown(KeyboardKey.KEY_A))
+    // {
+    //     movement.X -= 2;
+    // }
+    // if (Raylib.IsKeyDown(KeyboardKey.KEY_W))
+    // {
+    //     movement.Y -= 2;
+    // }
+    // if (Raylib.IsKeyDown(KeyboardKey.KEY_S))
+    // {
+    //     movement.Y += 2;
+    // }
+
+
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_RIGHT))
+            {
+                // Check for collision with walls
+                if (!LevelCollision(CellHitbox, movementX + speed, movementY))
+                {
+                    movementX += speed;
+                }
+            }
+            else if (Raylib.IsKeyDown(KeyboardKey.KEY_LEFT))
+            {
+                if (!LevelCollision(CellHitbox, movementX - speed, movementY))
+                {
+                    movementX -= speed;
+                }
+            }
+
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
+            {
+                if (!LevelCollision(CellHitbox, movementX, movementY + speed))
+                {
+                    movementY += speed;
+                }
+            }
+            else if (Raylib.IsKeyDown(KeyboardKey.KEY_UP))
+            {
+                if (!LevelCollision(CellHitbox, movementX, movementY - speed, ))
+                {
+                    movementY -= speed;
+                }
+            }    
 
     if (movement.Length() > 0)
     {
@@ -140,9 +174,9 @@ while (!Raylib.WindowShouldClose())
         Raylib.DrawRectangleRec(enemy, Color.WHITE);
 
 
-        Raylib.DrawRectangleRec(character, Color.BLANK);
-        Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
-        Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
+        // Raylib.DrawRectangleRec(character, Color.BLANK);
+        // Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
+        // Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
 
         GameScreen(PlayerSprite, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
         
@@ -192,14 +226,21 @@ static void GameScreen(Texture2D PlayerSprite, Rectangle character, int ScreenWi
     foreach (var cell in CellHitbox)
     {
         Raylib.DrawRectangleRec(cell, Color.PURPLE);
-
-        if (Raylib.CheckCollisionRecs(cell, character))
-       {
-            //---- 
-       } 
     }
-    
+   
 
 }
 
+// static bool LevelCollision(List<Rectangle> Cellhitbox)
+// {
+//         Rectangle character = new(400, 400, 40, 40);
 
+
+//     foreach (var cell in CellHitbox) 
+//     {
+//         if (Raylib.CheckCollisionRecs(cell, character))
+//         {
+//             return true; 
+//         }
+//     }
+// }
