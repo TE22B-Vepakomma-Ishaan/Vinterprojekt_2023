@@ -20,13 +20,11 @@ Rectangle ghostBorder = new(950, 30, 240, 240);
 
 
 Vector2 border = new(gameBorder.x, gameBorder.y);
-Rectangle character = new(400, 400, 40, 40);
-Texture2D PlayerSprite = Raylib.LoadTexture("GreenBall.png");
+Rectangle character = new(400, 450, 30, 30);
+Texture2D PlayerSprite = Raylib.LoadTexture("RedEye.png");
 
 
 Vector2 movement = new(0, 0);
-float movementX = 1;
-float movementY = 1;
 float speed = 10;
 float Enemyspeed = 4;
 
@@ -90,36 +88,36 @@ while (!Raylib.WindowShouldClose())
     // {
     //     movement.Y += 2;
     // }
-
-
+ 
+ 
             if (Raylib.IsKeyDown(KeyboardKey.KEY_RIGHT))
             {
                 // Check for collision with walls
-                if (!LevelCollision(CellHitbox, movementX + speed, movementY))
+                if (!Collision(CellHitbox, character.x + speed, character.y))
                 {
-                    movementX += speed;
+                    character.x += speed;
                 }
             }
             else if (Raylib.IsKeyDown(KeyboardKey.KEY_LEFT))
             {
-                if (!LevelCollision(CellHitbox, movementX - speed, movementY))
+                if (!Collision(CellHitbox, character.x - speed, character.y))
                 {
-                    movementX -= speed;
+                    character.x -= speed;
                 }
             }
 
             if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
             {
-                if (!LevelCollision(CellHitbox, movementX, movementY + speed))
+                if (!Collision(CellHitbox, character.x, character.y + speed))
                 {
-                    movementY += speed;
+                    character.y += speed;
                 }
             }
             else if (Raylib.IsKeyDown(KeyboardKey.KEY_UP))
             {
-                if (!LevelCollision(CellHitbox, movementX, movementY - speed, ))
+                if (!Collision(CellHitbox, character.x, character.y - speed))
                 {
-                    movementY -= speed;
+                    character.y -= speed;
                 }
             }    
 
@@ -136,11 +134,6 @@ while (!Raylib.WindowShouldClose())
     character.y = Math.Clamp(character.y, 25, 780);
     // ------------------Micke----------------------- 
 
-
-    if (Raylib.IsKeyDown(KeyboardKey.KEY_D))
-    {
-        character.x++;
-    }
 
     
 
@@ -174,12 +167,13 @@ while (!Raylib.WindowShouldClose())
         Raylib.DrawRectangleRec(enemy, Color.WHITE);
 
 
-        // Raylib.DrawRectangleRec(character, Color.BLANK);
-        // Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
-        // Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
+        Raylib.DrawRectangleRec(character, Color.BLANK);
+        Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
+        Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
 
         GameScreen(PlayerSprite, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
         
+        Raylib.DrawFPS(1000, 500);
 
 
     }
@@ -223,7 +217,8 @@ static void GameScreen(Texture2D PlayerSprite, Rectangle character, int ScreenWi
 
         }
     }
-    foreach (var cell in CellHitbox)
+    // make better solution if time
+    foreach (var cell in CellHitbox.Take(162))
     {
         Raylib.DrawRectangleRec(cell, Color.PURPLE);
     }
@@ -231,16 +226,21 @@ static void GameScreen(Texture2D PlayerSprite, Rectangle character, int ScreenWi
 
 }
 
-// static bool LevelCollision(List<Rectangle> Cellhitbox)
-// {
-//         Rectangle character = new(400, 400, 40, 40);
 
 
-//     foreach (var cell in CellHitbox) 
-//     {
-//         if (Raylib.CheckCollisionRecs(cell, character))
-//         {
-//             return true; 
-//         }
-//     }
-// }
+
+static bool Collision(List<Rectangle> CellHitbox, float x, float y)
+{
+    Rectangle character = new Rectangle(x, y, 40,40);
+
+    // Check for collision with each wall
+    foreach (var cell in CellHitbox)
+    {
+        if (Raylib.CheckCollisionRecs(character, cell))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
