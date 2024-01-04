@@ -1,7 +1,9 @@
 ﻿
 using System.ComponentModel;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Raylib_cs;
 
@@ -24,6 +26,9 @@ Vector2 border = new(gameBorder.x, gameBorder.y);
 Rectangle character = new(400, 450, 35, 35);
 Texture2D PlayerSprite = Raylib.LoadTexture("RedEye2.png");
 Texture2D Tile = Raylib.LoadTexture("purple_tile2.png");
+
+
+
 
 
 Vector2 movement = new(0, 0);
@@ -59,8 +64,15 @@ int[,] Level = {
 };
 
 
+int n = 12;
 
 List<Rectangle> CellHitbox = new();
+
+List<Tuple<int, int>> PositionsList = new();
+
+List<Rectangle> points = new();
+
+List<Tuple<int, int>> RandomizedPositions = new();
 
 
 // Raylib--------------------------------------------------------------------------------------------------------------------------------
@@ -150,10 +162,18 @@ while (!Raylib.WindowShouldClose())
 
         Raylib.DrawRectangleRec(character, Color.BLANK);
         Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
-        Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
+        // Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
 
-        GameScreen(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
+        GameScreen(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox, PositionsList);
+        Pointsystem(Level, n, PositionsList, points, RandomizedPositions);
+       
+        foreach(var Point in RandomizedPositions)
+        {
+            int pointX = Point.Item1;
+            int pointY = Point.Item2;
 
+            Raylib.DrawRectangle(pointX, pointY, 20, 20, Raylib_cs.Color.GOLD);
+        }
         Raylib.DrawFPS(1000, 500);
 
 
@@ -177,7 +197,7 @@ while (!Raylib.WindowShouldClose())
 // Functions-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Rectangle> CellHitbox)
+static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Rectangle> CellHitbox, List<Tuple<int, int>> PositionsList)
 {
     for (int i = 0; i < Level.GetLength(0); i++)
     {
@@ -191,12 +211,18 @@ static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle charact
                 float y = i * CellHeight + 25;
 
                 Rectangle cell = new((int)x, (int)y, (int)CellWidth, (int)CellHeight);
-                
+
                 CellHitbox.Add(cell);
 
 
             }
 
+            if (Level[i, j] == 0)
+            {
+                Tuple<int, int> Position = new Tuple<int, int>(i, j);
+                PositionsList.Add(Position);
+
+            }
         }
     }
     // make better solution if time
@@ -229,4 +255,37 @@ static bool Collision(List<Rectangle> CellHitbox, float x, float y)
 
 
 
+static void Pointsystem(int[,] Level, int n, List<Tuple<int, int>> PositionsList, List<Rectangle> points, List<Tuple<int, int>> RandomizedPositions)
+{
+    Random random = new();
+
+    for (int i = 0; i < Level.GetLength(0); i++)
+    {
+        for (int j = 0; j < Level.GetLength(1); j++)
+        {
+
+            if (Level[i, j] == 0)
+            {
+                Tuple<int, int> Position = new Tuple<int, int>(i, j);
+                PositionsList.Add(Position);
+                int index = random.Next(0, PositionsList.Count);
+                RandomizedPositions.Add(PositionsList[index]);
+
+
+                foreach (var position in RandomizedPositions.Take(n))
+                {
+
+                    float PointWidth = 20;
+                    float PointHeight = 20;
+                    float x = position.Item2 * PointWidth;
+                    float y = position.Item1 * PointHeight;
+
+                    Rectangle point = new Rectangle(x, y, PointWidth, PointHeight);
+                    points.Add(point);
+                }
+            }
+
+        }
+    }
+}
 
