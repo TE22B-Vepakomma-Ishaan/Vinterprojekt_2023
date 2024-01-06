@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Raylib_cs;
 
-Random generator = new();
+Random random = new();
 
 
 
@@ -18,24 +18,21 @@ Raylib.SetTargetFPS(60);
 string screen = "menu";
 
 
-Rectangle gameBorder = new(25, 25, 800, 800);
-Rectangle ghostBorder = new(950, 30, 240, 240);
 
 
-Vector2 border = new(gameBorder.x, gameBorder.y);
-Rectangle character = new(400, 450, 35, 35);
+
 Texture2D PlayerSprite = Raylib.LoadTexture("RedEye2.png");
 Texture2D Tile = Raylib.LoadTexture("purple_tile2.png");
+Texture2D CoinSprite = Raylib.LoadTexture("coin.png");
 
 
 
+Raylib_cs.Rectangle character = new(410, 410, 42, 42);
+Raylib_cs.Rectangle door = new(407, 450, 38, 65);
 
 
 Vector2 movement = new(0, 0);
 float speed = 7;
-float Enemyspeed = 4;
-
-Rectangle enemy = new(550, 40, 60, 80);
 
 
 const int ScreenWidth = 800;
@@ -64,15 +61,22 @@ int[,] Level = {
 };
 
 
-int n = 12;
 
-List<Rectangle> CellHitbox = new();
+int n = 24;
 
-List<Tuple<int, int>> PositionsList = new();
+List<Raylib_cs.Rectangle> CellHitbox = new();
 
-List<Rectangle> points = new();
+List<Raylib_cs.Rectangle> PositionsList = new();
 
-List<Tuple<int, int>> RandomizedPositions = new();
+List<Raylib_cs.Rectangle> RandomizedPositions = new();
+
+
+
+
+
+
+
+
 
 
 // Raylib--------------------------------------------------------------------------------------------------------------------------------
@@ -91,14 +95,14 @@ while (!Raylib.WindowShouldClose())
     if (Raylib.IsKeyDown(KeyboardKey.KEY_D))
     {
 
-        if (!Collision(CellHitbox, character.x + speed, character.y))
+        if (!LevelCollision(CellHitbox, character.x + speed, character.y))
         {
             character.x += speed;
         }
     }
     else if (Raylib.IsKeyDown(KeyboardKey.KEY_A))
     {
-        if (!Collision(CellHitbox, character.x - speed, character.y))
+        if (!LevelCollision(CellHitbox, character.x - speed, character.y))
         {
             character.x -= speed;
         }
@@ -106,14 +110,14 @@ while (!Raylib.WindowShouldClose())
 
     if (Raylib.IsKeyDown(KeyboardKey.KEY_S))
     {
-        if (!Collision(CellHitbox, character.x, character.y + speed))
+        if (!LevelCollision(CellHitbox, character.x, character.y + speed))
         {
             character.y += speed;
         }
     }
     else if (Raylib.IsKeyDown(KeyboardKey.KEY_W))
     {
-        if (!Collision(CellHitbox, character.x, character.y - speed))
+        if (!LevelCollision(CellHitbox, character.x, character.y - speed))
         {
             character.y -= speed;
         }
@@ -129,6 +133,12 @@ while (!Raylib.WindowShouldClose())
 
 
 
+    
+   
+
+
+
+
 
 
 
@@ -139,8 +149,8 @@ while (!Raylib.WindowShouldClose())
     if (screen == "menu")
     {
 
-        Raylib.ClearBackground(Color.BLACK);
-        Raylib.DrawText("press SPACE to start", 450, 500, 35, Color.WHITE);
+        Raylib.ClearBackground(Raylib_cs.Color.BLACK);
+        Raylib.DrawText("press SPACE to start", 450, 500, 35, Raylib_cs.Color.WHITE);
 
         if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
         {
@@ -153,34 +163,49 @@ while (!Raylib.WindowShouldClose())
     if (screen == "game")
     {
 
-        Raylib.ClearBackground(Color.BLACK);
-        Raylib.DrawRectangleLinesEx(ghostBorder, 5, Color.PURPLE);
+        Raylib.ClearBackground(Raylib_cs.Color.BLACK);
 
 
+        // Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Raylib_cs.Color.WHITE);
+
+        LevelLayout(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
 
 
-
-        Raylib.DrawRectangleRec(character, Color.BLANK);
-        Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Color.PURPLE);
-        // Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Color.WHITE);
-
-        GameScreen(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox, PositionsList);
-        Pointsystem(Level, n, PositionsList, points, RandomizedPositions);
-       
-        foreach(var Point in RandomizedPositions)
+       CoinRandomize(random, ScreenWidth, ScreenHeight, GridSize, Level, PositionsList, RandomizedPositions);
+        
+        foreach (var Position in RandomizedPositions)
         {
-            int pointX = Point.Item1;
-            int pointY = Point.Item2;
 
-            Raylib.DrawRectangle(pointX, pointY, 20, 20, Raylib_cs.Color.GOLD);
+            Raylib_cs.Rectangle coin = new(Position.x + 12, Position.y + 12, 20, 20);
+            Raylib.DrawRectangleRec(coin, Raylib_cs.Color.BLANK);
+            Raylib.DrawTexture(CoinSprite, (int)Position.x + 12, (int)Position.y + 12, Raylib_cs.Color.GOLD);
+
+
+
+
+            if (Raylib.CheckCollisionRecs(character, coin))
+             {
+                
+             }
+
+
+
+
         }
+
+
+        Raylib.DrawRectangleRec(door, Raylib_cs.Color.WHITE);
+        
+        Raylib.DrawRectangleRec(character, Raylib_cs.Color.BLANK);
+        Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Raylib_cs.Color.PURPLE);
+        
+        
+        Raylib.DrawText($"{character.x}  {character.y}", 1000, 800, 30, Raylib_cs.Color.WHITE);
         Raylib.DrawFPS(1000, 500);
-
-
     }
 
 
-
+    
 
 
 
@@ -197,7 +222,7 @@ while (!Raylib.WindowShouldClose())
 // Functions-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Rectangle> CellHitbox, List<Tuple<int, int>> PositionsList)
+static void LevelLayout(Texture2D PlayerSprite, Texture2D Tile, Raylib_cs.Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Raylib_cs.Rectangle> CellHitbox)
 {
     for (int i = 0; i < Level.GetLength(0); i++)
     {
@@ -210,17 +235,10 @@ static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle charact
                 float x = j * CellWidth + 25;
                 float y = i * CellHeight + 25;
 
-                Rectangle cell = new((int)x, (int)y, (int)CellWidth, (int)CellHeight);
+                Raylib_cs.Rectangle cell = new((int)x, (int)y, (int)CellWidth, (int)CellHeight);
 
                 CellHitbox.Add(cell);
 
-
-            }
-
-            if (Level[i, j] == 0)
-            {
-                Tuple<int, int> Position = new Tuple<int, int>(i, j);
-                PositionsList.Add(Position);
 
             }
         }
@@ -228,8 +246,8 @@ static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle charact
     // make better solution if time
     foreach (var cell in CellHitbox.Take(162))
     {
-        Raylib.DrawRectangleRec(cell, Color.BLANK);
-        Raylib.DrawTexture(Tile, (int)cell.x, (int)cell.y, Color.DARKPURPLE);
+        Raylib.DrawRectangleRec(cell, Raylib_cs.Color.BLANK);
+        Raylib.DrawTexture(Tile, (int)cell.x, (int)cell.y, Raylib_cs.Color.DARKPURPLE);
     }
 
 
@@ -237,10 +255,9 @@ static void GameScreen(Texture2D PlayerSprite, Texture2D Tile, Rectangle charact
 
 
 
-
-static bool Collision(List<Rectangle> CellHitbox, float x, float y)
+static bool LevelCollision(List<Raylib_cs.Rectangle> CellHitbox, float x, float y)
 {
-    Rectangle character = new Rectangle(x, y, 35, 35);
+    Raylib_cs.Rectangle character = new Raylib_cs.Rectangle(x, y, 35, 35);
 
     foreach (var cell in CellHitbox)
     {
@@ -255,37 +272,36 @@ static bool Collision(List<Rectangle> CellHitbox, float x, float y)
 
 
 
-static void Pointsystem(int[,] Level, int n, List<Tuple<int, int>> PositionsList, List<Rectangle> points, List<Tuple<int, int>> RandomizedPositions)
+static void CoinRandomize(Random random, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Raylib_cs.Rectangle> PositionsList, List<Raylib_cs.Rectangle> RandomizedPositions)
 {
-    Random random = new();
-
     for (int i = 0; i < Level.GetLength(0); i++)
     {
         for (int j = 0; j < Level.GetLength(1); j++)
         {
-
-            if (Level[i, j] == 0)
+            if (Level[i, j] == 0 && (i != 9 || j != 9) && (i != 10 || j != 9) && (i != 10 || j != 9))     
+            // 9 10, 9 11, 9 9
             {
-                Tuple<int, int> Position = new Tuple<int, int>(i, j);
-                PositionsList.Add(Position);
-                int index = random.Next(0, PositionsList.Count);
-                RandomizedPositions.Add(PositionsList[index]);
+                float CellWidth = ScreenWidth / (float)GridSize;
+                float CellHeight = ScreenHeight / (float)GridSize;
+                float x = j * CellWidth + 25;
+                float y = i * CellHeight + 25;
 
+                Raylib_cs.Rectangle Positions = new((int)x, (int)y, (int)CellWidth, (int)CellHeight);
 
-                foreach (var position in RandomizedPositions.Take(n))
-                {
-
-                    float PointWidth = 20;
-                    float PointHeight = 20;
-                    float x = position.Item2 * PointWidth;
-                    float y = position.Item1 * PointHeight;
-
-                    Rectangle point = new Rectangle(x, y, PointWidth, PointHeight);
-                    points.Add(point);
-                }
+                PositionsList.Add(Positions);
             }
-
         }
+    }
+
+
+
+    for (int i = 0; i < PositionsList.Count;)
+    {
+        int index = random.Next(0, PositionsList.Count);
+
+        RandomizedPositions.Add(PositionsList[index]);
+        PositionsList.RemoveAt(index);
+
     }
 }
 
