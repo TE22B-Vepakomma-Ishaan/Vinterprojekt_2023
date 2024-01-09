@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using Raylib_cs;
 
 Random random = new();
@@ -29,6 +30,7 @@ Texture2D CoinSprite = Raylib.LoadTexture("coin.png");
 
 Raylib_cs.Rectangle character = new(410, 410, 42, 42);
 Raylib_cs.Rectangle door = new(407, 450, 38, 65);
+Raylib_cs.Rectangle doorHitbox = new(429, 465, 2, 10);
 
 
 Vector2 movement = new(0, 0);
@@ -63,12 +65,16 @@ int[,] Level = {
 
 
 int n = 24;
+int score = 0;
+
 
 List<Raylib_cs.Rectangle> CellHitbox = new();
 
 List<Raylib_cs.Rectangle> PositionsList = new();
 
 List<Raylib_cs.Rectangle> RandomizedPositions = new();
+
+List<Raylib_cs.Rectangle> CoinSatchel = new();
 
 
 
@@ -133,8 +139,8 @@ while (!Raylib.WindowShouldClose())
 
 
 
-    
-   
+
+
 
 
 
@@ -171,41 +177,57 @@ while (!Raylib.WindowShouldClose())
         LevelLayout(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
 
 
-       CoinRandomize(random, ScreenWidth, ScreenHeight, GridSize, Level, PositionsList, RandomizedPositions);
-        
-        foreach (var Position in RandomizedPositions)
+        CoinRandomize(random, ScreenWidth, ScreenHeight, GridSize, Level, PositionsList, RandomizedPositions, CoinSatchel, n);
+
+
+        for (int i = 0; i < CoinSatchel.Count ; i++)
         {
-
-            Raylib_cs.Rectangle coin = new(Position.x + 12, Position.y + 12, 20, 20);
-            Raylib.DrawRectangleRec(coin, Raylib_cs.Color.BLANK);
-            Raylib.DrawTexture(CoinSprite, (int)Position.x + 12, (int)Position.y + 12, Raylib_cs.Color.GOLD);
-
-
-
-
-            if (Raylib.CheckCollisionRecs(character, coin))
-             {
-                
-             }
-
-
-
+            Raylib.DrawRectangleRec(CoinSatchel[i], Raylib_cs.Color.BLANK);
+            Raylib.DrawTexture(CoinSprite, (int)CoinSatchel[i].x, (int)CoinSatchel[i].y, Raylib_cs.Color.GOLD);
 
         }
 
+        for (int i = CoinSatchel.Count -1 ; i >= 0; i--)
+        {
+            if (Raylib.CheckCollisionRecs(character, CoinSatchel[i]))
+            {
+                Console.WriteLine($"Collision detected with coin at index {i}");
+                CoinSatchel.RemoveAt(i);
+                score++;
+                break;
+            }
+        }
 
-        Raylib.DrawRectangleRec(door, Raylib_cs.Color.WHITE);
-        
+
+
+        Raylib.DrawRectangleRec(door, Raylib_cs.Color.GRAY);
+        Raylib.DrawRectangleRec(doorHitbox, Raylib_cs.Color.BLANK);
+
         Raylib.DrawRectangleRec(character, Raylib_cs.Color.BLANK);
         Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Raylib_cs.Color.PURPLE);
-        
-        
+
+
         Raylib.DrawText($"{character.x}  {character.y}", 1000, 800, 30, Raylib_cs.Color.WHITE);
+        Raylib.DrawText($"Score: {score}", 1000, 200, 40, Raylib_cs.Color.WHITE);
+        Raylib.DrawText($" Coins in CoinSatchel list: {CoinSatchel.Count}", 800, 400, 25, Raylib_cs.Color.WHITE);
         Raylib.DrawFPS(1000, 500);
+
+
+        if (score >= n && Raylib.CheckCollisionRecs(character, doorHitbox))
+        {
+            screen = "end";
+        }
     }
 
 
-    
+    if(screen == "end")
+    {
+        Raylib.ClearBackground(Raylib_cs.Color.BLACK);
+        Raylib.DrawText("LEVEL COMPLETE!", 375, 500, 50, Raylib_cs.Color.WHITE);
+    }
+
+
+
 
 
 
@@ -272,13 +294,13 @@ static bool LevelCollision(List<Raylib_cs.Rectangle> CellHitbox, float x, float 
 
 
 
-static void CoinRandomize(Random random, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Raylib_cs.Rectangle> PositionsList, List<Raylib_cs.Rectangle> RandomizedPositions)
+static void CoinRandomize(Random random, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Raylib_cs.Rectangle> PositionsList, List<Raylib_cs.Rectangle> RandomizedPositions, List<Raylib_cs.Rectangle> CoinSatchel, int n)
 {
     for (int i = 0; i < Level.GetLength(0); i++)
     {
         for (int j = 0; j < Level.GetLength(1); j++)
         {
-            if (Level[i, j] == 0 && (i != 9 || j != 9) && (i != 10 || j != 9) && (i != 10 || j != 9))     
+            if (Level[i, j] == 0 && (i != 8 || j != 8) && (i != 9 || j != 8) && (i != 10 || j != 8))
             // 9 10, 9 11, 9 9
             {
                 float CellWidth = ScreenWidth / (float)GridSize;
@@ -302,6 +324,20 @@ static void CoinRandomize(Random random, int ScreenWidth, int ScreenHeight, int 
         RandomizedPositions.Add(PositionsList[index]);
         PositionsList.RemoveAt(index);
 
+    }
+
+    foreach (var Position in RandomizedPositions.Take(n))
+    {
+
+
+        float CoinX = Position.x + 12;
+        float CoinY = Position.y + 12;
+        Raylib_cs.Rectangle coin = new(CoinX, CoinY, 20, 20);
+
+        if (CoinSatchel.Count < n )
+        {
+            CoinSatchel.Add(coin);
+        }
     }
 }
 
