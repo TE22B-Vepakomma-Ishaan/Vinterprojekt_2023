@@ -1,15 +1,8 @@
 ﻿
-using System.ComponentModel;
-using System.Drawing;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
 using Raylib_cs;
 
 Random random = new();
-
 
 
 Raylib.InitWindow(1300, 1000, "Ghost game thing");
@@ -17,8 +10,6 @@ Raylib.SetTargetFPS(60);
 
 
 string screen = "menu";
-
-
 
 
 
@@ -33,13 +24,21 @@ Raylib_cs.Rectangle door = new(407, 450, 38, 65);
 Raylib_cs.Rectangle doorHitbox = new(429, 465, 2, 10);
 
 
+
 Vector2 movement = new(0, 0);
+
+
+
 float speed = 7;
 
 
-const int ScreenWidth = 800;
-const int ScreenHeight = 800;
-const int GridSize = 17;
+
+int ScreenWidth = 800;
+int ScreenHeight = 800;
+int GridSize = 17;
+int n = 24;
+int score = 0;
+
 
 
 int[,] Level = {
@@ -64,10 +63,6 @@ int[,] Level = {
 
 
 
-int n = 24;
-int score = 0;
-
-
 List<Raylib_cs.Rectangle> CellHitbox = new();
 
 List<Raylib_cs.Rectangle> PositionsList = new();
@@ -78,14 +73,18 @@ List<Raylib_cs.Rectangle> CoinSatchel = new();
 
 
 
-
-
-
-
-
-
-
 // Raylib--------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
 
 while (!Raylib.WindowShouldClose())
 {
@@ -152,6 +151,15 @@ while (!Raylib.WindowShouldClose())
 
 
 
+
+
+
+
+
+
+
+
+
     if (screen == "menu")
     {
 
@@ -174,7 +182,8 @@ while (!Raylib.WindowShouldClose())
 
         // Raylib.DrawText($"{character.x}{character.y}", 1000, 800, 20, Raylib_cs.Color.WHITE);
 
-        LevelLayout(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
+        CreateLevel(PlayerSprite, Tile, character, ScreenWidth, ScreenHeight, GridSize, Level, CellHitbox);
+        DrawLevel(Tile, CellHitbox);
 
 
         CoinRandomize(random, ScreenWidth, ScreenHeight, GridSize, Level, PositionsList, RandomizedPositions, CoinSatchel, n);
@@ -191,7 +200,7 @@ while (!Raylib.WindowShouldClose())
         {
             if (Raylib.CheckCollisionRecs(character, CoinSatchel[i]))
             {
-                Console.WriteLine($"Collision detected with coin at index {i}");
+                // Console.WriteLine($"Collision detected with coin at index {i}");
                 CoinSatchel.RemoveAt(i);
                 score++;
                 break;
@@ -207,9 +216,9 @@ while (!Raylib.WindowShouldClose())
         Raylib.DrawTexture(PlayerSprite, (int)character.x, (int)character.y, Raylib_cs.Color.PURPLE);
 
 
-        Raylib.DrawText($"{character.x}  {character.y}", 1000, 800, 30, Raylib_cs.Color.WHITE);
+        // Raylib.DrawText($"{character.x}  {character.y}", 1000, 800, 30, Raylib_cs.Color.WHITE);
         Raylib.DrawText($"Score: {score}", 1000, 200, 40, Raylib_cs.Color.WHITE);
-        Raylib.DrawText($" Coins in CoinSatchel list: {CoinSatchel.Count}", 800, 400, 25, Raylib_cs.Color.WHITE);
+        // Raylib.DrawText($" Coins in CoinSatchel list: {CoinSatchel.Count}", 800, 400, 25, Raylib_cs.Color.WHITE);
         Raylib.DrawFPS(1000, 500);
 
 
@@ -220,18 +229,12 @@ while (!Raylib.WindowShouldClose())
     }
 
 
-    if(screen == "end")
+    if(screen == "end") 
     {
         Raylib.ClearBackground(Raylib_cs.Color.BLACK);
         Raylib.DrawText("LEVEL COMPLETE!", 375, 500, 50, Raylib_cs.Color.WHITE);
+        
     }
-
-
-
-
-
-
-
 
 
     Raylib.EndDrawing();
@@ -244,8 +247,19 @@ while (!Raylib.WindowShouldClose())
 // Functions-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-static void LevelLayout(Texture2D PlayerSprite, Texture2D Tile, Raylib_cs.Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Raylib_cs.Rectangle> CellHitbox)
+
+
+
+
+
+
+
+
+
+static List<Raylib_cs.Rectangle> CreateLevel(Texture2D PlayerSprite, Texture2D Tile, Raylib_cs.Rectangle character, int ScreenWidth, int ScreenHeight, int GridSize, int[,] Level, List<Raylib_cs.Rectangle> CellHitbox)
 {
+
+
     for (int i = 0; i < Level.GetLength(0); i++)
     {
         for (int j = 0; j < Level.GetLength(1); j++)
@@ -261,19 +275,28 @@ static void LevelLayout(Texture2D PlayerSprite, Texture2D Tile, Raylib_cs.Rectan
 
                 CellHitbox.Add(cell);
 
+                
 
             }
         }
     }
-    // make better solution if time
+    return CellHitbox;
+
+
+}
+
+
+static void DrawLevel(Texture2D Tile, List<Raylib_cs.Rectangle> CellHitbox)
+{
     foreach (var cell in CellHitbox.Take(162))
     {
         Raylib.DrawRectangleRec(cell, Raylib_cs.Color.BLANK);
         Raylib.DrawTexture(Tile, (int)cell.x, (int)cell.y, Raylib_cs.Color.DARKPURPLE);
     }
-
-
 }
+
+
+
 
 
 
@@ -340,4 +363,3 @@ static void CoinRandomize(Random random, int ScreenWidth, int ScreenHeight, int 
         }
     }
 }
-
